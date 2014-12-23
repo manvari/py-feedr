@@ -1,0 +1,12 @@
+{
+	"example1": {
+		"name": "Example 1",
+		"db_table": "example1",
+		"url": "http://example1.com/feed.rss"
+	},
+	"lnxkrnl": {
+		"name": "Linux Kernel",
+		"db_table": "linkernel",
+		"url": "https://www.kernel.org/feeds/kdist.xml"
+	}
+}
