@@ -108,6 +108,7 @@ class MonitorFeedUpdate(object):
         # RSS feed
         self.feed_name = feed_name
         self.feed = feedparser.parse(feed_url)
+        self.latest_entry = self.feed.entries[0] # for convenience
 
         # DatabaseManager object
         self.dbmanager = DatabaseManager(sqlite_db, feed_dbtable)
@@ -126,17 +127,25 @@ class MonitorFeedUpdate(object):
 
         unchecked_hash = (self.rss_latest_sha256(),)
         check = self.dbmanager.check_for_existing_update(unchecked_hash)
-
+        localtime_log = time.strftime("%d %b %Y - %H:%M:%S", time.gmtime())
+        
         if check:
             # FIXME: Use logging module
-            localtime_log = time.strftime("%d %b %Y - %H:%M:%S", time.gmtime())
             print(
                 '[{}] - {} -  No new update found.'.format(self.feed_name,
                                                            localtime_log))
         else:
             self.dbmanager.create_latest_rss_entry(
                 self.latest_rss_entry_to_db())
-            return self.tweetupdate.tweet_latest_update()
+            self.tweetupdate.tweet_latest_update(self.feed_name, self.latest_entry)
+            print(
+            '{0} - {1} - New update posted: {2}\n'
+            '{0} - {1} - Update title: {3}\n'
+            '{0} - {1} - Published: {4}\n'.format(
+                self.feed_name, localtime_log,
+                self.rss_latest_sha256()[:10],
+                self.latest_entry['title'],
+                self.latest_entry['published']))
 
     def rss_latest_sha256(self):
         '''
@@ -145,7 +154,7 @@ class MonitorFeedUpdate(object):
 
         Returns the hex digest of the SHA-256 hash.
         '''
-        entry = self.feed.entries[0]
+        entry = self.latest_entry
         genhash = hashlib.sha256()
         genhash.update((entry['published'] + entry['title']
                         + entry['link']).encode('utf-8'))
@@ -157,7 +166,7 @@ class MonitorFeedUpdate(object):
         following structure:
             (sha256_hash text, date text, title text, url text)
         '''
-        entry = self.feed.entries[0]
+        entry = self.latest_entry
         update = (self.rss_latest_sha256(), entry['published'], entry['title'],
                   entry['link'])
 
@@ -192,21 +201,21 @@ class TweetUpdate(object):
                                headers={'Accept': 'application/json'})
         return request.json()['shorturl']
 
-    def latest_rss_to_tweet(self):
+    def latest_rss_to_tweet(self, feed_name, feed_entry):
         '''
         Converts the latest RSS entry in a feed
         to a tweetable message of 140 characters
         containing a shortened (is.gd) URL.
         '''
 
-        entry = self.feed.entries[0]
+        entry = feed_entry
         short_url = self.shorten_url(entry['link'])
-        msg = '[{}] {} {}'.format(self.feed_name, entry['title'], short_url)
+        msg = '[{}] {} {}'.format(feed_name, entry['title'], short_url)
 
         if len(msg) > 140:
             excess_chars = len(msg) - 140
             stripped_title = '[{}] {}{}'.format(
-                self.feed_name,
+                feed_name,
                 entry['title'][
                     :-excess_chars-3],
                 '...')  # remove 3 more chars to add dots
@@ -216,22 +225,12 @@ class TweetUpdate(object):
 
         return final_msg
 
-    def tweet_latest_update(self):
+    def tweet_latest_update(self, feed_name, feed_entry):
         '''
         Tweets the latest update, logs when doing so.
         '''
-        latest_update = self.latest_rss_to_tweet()
-
-        localtime_log = time.strftime("%d %b %Y - %H:%M:%S", time.gmtime())
-        print(
-            '{0} - {1} - New update posted: {2}\n'
-            '{0} - {1} - Update title: {3}\n'
-            '{0} - {1} - Published: {4}\n'.format(
-                self.feed_name, localtime_log,
-                self.rss_latest_sha256()[:10],
-                self.feed.entries[0]['title'],
-                self.feed.entries[0]['published']))
-
+        
+        latest_update = self.latest_rss_to_tweet(feed_name, feed_entry)
         return self.twitter_api.statuses.update(status=latest_update)
 
 if __name__ == "__main__":
@@ -255,9 +254,8 @@ if __name__ == "__main__":
             feedlist[feed]['name'],
             feedlist[feed]['url'],
             sqlite_db,
-            feedlist[feed]['db_table']
+            feedlist[feed]['db_table'],
             oauth_key,
             oauth_secret,
             consumer_key,
             consumer_secret).monitor()
-
