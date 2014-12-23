@@ -237,9 +237,9 @@ class TweetUpdate(object):
 if __name__ == "__main__":
 
     configparser = SafeConfigParser()
-    cfg = configparser.read('leb_rss.ini')
+    cfg = configparser.read('feedr.ini')
     if not cfg:
-        raise ValueError('Could not find configuration file leb_rss.ini')
+        raise ValueError('Could not find configuration file feedr.ini')
 
     feedlist_location = configparser['feeds']['feedlist']
     with open(feedlist_location) as f:
