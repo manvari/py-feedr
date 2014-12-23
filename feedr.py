@@ -254,9 +254,10 @@ if __name__ == "__main__":
         MonitorFeedUpdate(
             feedlist[feed]['name'],
             feedlist[feed]['url'],
+            sqlite_db,
+            feedlist[feed]['db_table']
             oauth_key,
             oauth_secret,
             consumer_key,
-            consumer_secret,
-            sqlite_db,
-            feedlist[feed]['db_table']).monitor()
+            consumer_secret).monitor()
+
