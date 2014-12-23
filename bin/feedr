@@ -1,0 +1,33 @@
+#! /usr/bin/env python3
+
+from configparser import SafeConfigParser
+import json
+
+from feedr.monitor import MonitorFeedUpdate
+
+if __name__ == "__main__":
+
+    configparser = SafeConfigParser()
+    cfg = configparser.read('feedr.ini')
+    if not cfg:
+        raise ValueError('Could not find configuration file feedr.ini')
+
+    feedlist_location = configparser['feeds']['feedlist']
+    with open(feedlist_location) as f:
+        feedlist = json.load(f)
+    oauth_key = configparser['twitter']['oauth_key']
+    oauth_secret = configparser['twitter']['oauth_secret']
+    consumer_key = configparser['twitter']['consumer_key']
+    consumer_secret = configparser['twitter']['consumer_secret']
+    sqlite_db = configparser['sqlite']['db_path']
+
+    for feed in feedlist.keys():
+        MonitorFeedUpdate(
+            feedlist[feed]['name'],
+            feedlist[feed]['url'],
+            sqlite_db,
+            feedlist[feed]['db_table'],
+            oauth_key,
+            oauth_secret,
+            consumer_key,
+            consumer_secret).monitor()
