@@ -53,7 +53,3 @@ docs/_build/
 
 # PyBuilder
 target/
-
-# feedr configuration file and feedlist
-feedr.ini
-feedlist.json

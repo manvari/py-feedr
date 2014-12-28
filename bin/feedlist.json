@@ -1,0 +1,19 @@
+{
+	"lowendbox": {
+		"name": "LowEndBox",
+		"db_table": "lowendbox",
+		"url": "http://lowendbox.com/feed/"
+	},
+	"lowendtalk": {
+		"name": "LowEndTalk",
+		"db_table": "lowendtalk",
+		"url": "http://lowendtalk.com/categories/offers/feed.rss"
+	},
+	"dailyserverdeals": {
+		"name": "Daily Server Deals",
+		"db_table": "dailyserverdeals",
+		"url": "http://dailyserverdeals.com/offers/feed/"
+	}
+}
+
+
