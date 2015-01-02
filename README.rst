@@ -25,7 +25,7 @@ Simply use `pip` to install py-feedr::
 
         $ pip install py-feedr
 
-imgur-scraper provides the `feedr` binary.
+py-feedr provides the `feedr` binary.
 
 Usage
 =====

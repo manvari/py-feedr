@@ -43,6 +43,7 @@ Installation requirements:
 
 * Python 3
 * [requests](https://github.com/kennethreitz/requests)
+* [feedparser](https://pypi.python.org/pypi/feedparser)
 
 Runtime requirements:
 
