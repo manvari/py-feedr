@@ -20,7 +20,7 @@ __Not convinced?__
 If you're unsure whether feedr is the solution you need, check out [this Twitter account](https://twitter.com/LowEndBox_RSS) which uses feedr.
 
 ### Installation
-- - -
+----------------
 
 feedr can either be installed through pip (stable version) or manually (dev or stable version).
 
@@ -37,7 +37,7 @@ Manually:
 Then run `$ (sudo) python setup.py install` to install imgur-scraper.
 
 ### Requirements
-- - -
+----------------
 
 Installation requirements:
 
@@ -49,7 +49,7 @@ Runtime requirements:
 * A [Twitter account](https://twitter.com/signup)  with valid [API credentials](https://apps.twitter.com).
 
 ### Usage
-- - -
+---------
 
 feedr needs to be given an [INI configuration file](https://github.com/iceTwy/py-feedr/blob/master/bin/feedr.ini), which contains amongst other parameters a path to a JSON feedlist of RSS feeds that follows the [example format](https://github.com/iceTwy/py-feedr/blob/master/bin/feedlist.json).
 
@@ -66,6 +66,6 @@ positional arguments:
 ```
 
 ### License
-- - -
+-----------
 
 imgur-scraped is licensed under the WTFPLv2 license; refer to the LICENSE file.
