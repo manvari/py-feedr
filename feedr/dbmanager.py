@@ -1,5 +1,6 @@
 import sqlite3
 
+
 class DatabaseManager(object):
 
     '''
@@ -11,7 +12,8 @@ class DatabaseManager(object):
     def __init__(self, sqlite_db, feed_dbtable):
         '''
         Checks if it feed's table exists in the DB, creates it if not.
-            * Feed table structure: (sha256_hash text, date text, name text,
+            * Feed table structure: (id integer primary key autoincrement,
+                                     sha256_hash text, date text, name text,
                                      url text)
         '''
 
@@ -27,8 +29,8 @@ class DatabaseManager(object):
             # ! WARNING : Vulnerable to SQLi with forged table name
             # Ugly workaround for binding a table name
             c.execute(
-                'CREATE table {}(sha256_hash text, date text, title text, url text)'. format(
-                    self.feed_dbtable))
+                'CREATE table {}(id integer primary key autoincrement, sha256_hash text, date text, title text, url text)'.
+                format(self.feed_dbtable))
         conn.commit()
         conn.close()
 
@@ -37,18 +39,62 @@ class DatabaseManager(object):
         Receives an entry from TweetUpdate's latest_rss_entry_to_db method,
         then creates an entry in the feed's assigned table in the SQLite3
         database for the update, with the following structure:
-            (sha256_hash text, date text, title text, url text)
+            (id, sha256_hash text, date text, title text, url text)
+            where id is automatically generated.
         '''
 
         conn = sqlite3.connect(self.sqlite_db)
         c = conn.cursor()
 
         table = self.feed_dbtable
+
         # ! WARNING : Vulnerable to SQLi with forged table name
         # Ugly workaround for binding a table name
-        c.execute('INSERT INTO {} VALUES (?, ?, ?, ?)'.format(table), update)
+        c.execute(
+            'INSERT INTO {}(sha256_hash, date, title, url) VALUES(?, ?, ?, ?)'.
+            format(table), update)
         conn.commit()
         conn.close()
+
+    def del_last_table_entry(self):
+        '''
+        Deletes the last entry in a feed's table using the id column.
+        '''
+
+        conn = sqlite3.connect(self.sqlite_db)
+        c = conn.cursor()
+
+        table = self.feed_dbtable
+
+        # ! WARNING : Vulnerable to SQLi with forged table name
+        # Ugly workaround for binding a table name
+        c.execute(
+            "DELETE FROM {} WHERE id = (SELECT MAX(id) FROM {})".format(table))
+        conn.commit()
+        conn.close()
+
+    def get_last_table_entry(self):
+        '''
+        Returns the last entry in a feed's table using the id column.
+        '''
+
+        conn = sqlite3.connect(self.sqlite_db)
+        c = conn.cursor()
+
+        table = self.feed_dbtable
+
+        try:
+            # ! WARNING : Vulnerable to SQLi with forged table name
+            # Ugly workaround for binding a table name
+            c.execute("SELECT * FROM {} WHERE id = (SELECT MAX(id) FROM {})".format(table))
+            entry = c.fetchone()
+        except IndexError: # empty table
+            entry = None
+
+        conn.commit()
+        conn.close()
+
+        return entry
 
     def check_for_existing_update(self, hashval):
         '''
@@ -75,4 +121,3 @@ class DatabaseManager(object):
             conn.commit()
             conn.close()
             return False
-

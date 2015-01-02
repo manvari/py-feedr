@@ -1,3 +1,4 @@
+import difflib
 import feedparser
 import hashlib
 import time
@@ -39,9 +40,12 @@ class MonitorFeedUpdate(object):
     def monitor(self):
         '''
         Monitors the RSS feed for a new update.
-        This simply calls the DatabaseManager object's check_for_existing_update
-        method; if its return value is false, then TweetUpdate's
-        tweet_latest_update method is called.
+        This calls the DatabaseManager object's check_for_existing_update
+        method.
+         * New update: checks if it is a duplicate with is_duplicate_update,
+           removes the last tweet and DB entry if it is. In all cases, the
+           tweet_latest_update method is called. Logs.
+         * No new update: does nothing, logs.
         '''
 
         unchecked_hash = (self.rss_latest_sha256(),)
@@ -54,6 +58,15 @@ class MonitorFeedUpdate(object):
                 '[{}] - {} -  No new update found.'.format(self.feed_name,
                                                            localtime_log))
         else:
+            # See https://github.com/iceTwy/py-feedr/issues/4
+            if self.is_duplicate_update():
+                self.tweetupdate.delete_last_tweet()
+                entry_table_hash = self.dbmanager.get_last_table_entry[1]
+                self.dbmanager.del_last_table_entry()
+                print(
+                    '[{0}] - {1} - Duplicate update in the feed.\n'
+                    '[{0}] - {1} - Deleted entry {} from the table, and its associated tweet\n'.
+                    format(self.feed_name, localtime_log, entry_table_hash))
             self.dbmanager.create_latest_rss_entry(
                 self.latest_rss_entry_to_db())
             self.tweetupdate.tweet_latest_update(self.feed_name,
@@ -65,6 +78,28 @@ class MonitorFeedUpdate(object):
                       self.rss_latest_sha256()[:10],
                       self.latest_entry['title'],
                       self.latest_entry['published']))
+
+    def is_duplicate_update(self):
+        '''
+        Checks if an update is a duplicate of the previous one in the feed
+        by using fuzzy-string matching on the title or checking if the old
+        update's title is contained in the new one.
+        '''
+
+        cur_title = self.latest_entry['title']
+        last_table_entry = self.dbmanager.get_last_table_entry()
+        if not last_table_entry: # empty table
+            return False
+        else:
+            prev_title = last_table_entry[3]
+
+        if prev_title in cur_title:
+            return True
+        delta = difflib.SequenceMatcher(None, cur_title, prev_title)
+        if delta.ratio() >= 0.75:
+            return True
+
+        return False
 
     def rss_latest_sha256(self):
         '''

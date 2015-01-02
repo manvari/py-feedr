@@ -54,6 +54,15 @@ class TweetUpdate(object):
 
         return final_msg
 
+    def delete_last_tweet(self):
+        '''
+        Deletes the last tweet in the timeline.
+        This method is only called when an element in the feed is modified.
+        '''
+
+        last_tweet = self.twitter_api.statuses.home_timeline(count=1)[0]
+        return self.twitter_api.statuses.destroy(id=last_tweet['id'])
+
     def tweet_latest_update(self, feed_name, feed_entry):
         '''
         Tweets the latest update, logs when doing so.
