@@ -1,7 +1,7 @@
 py-feedr
 =============
 
-feedr is a WTFPLv2-licensed Python parser to tweet the latest updates from multiple RSS feeds.
+feedr is a non-asynchronous, WTFPLv2-licensed Python parser to tweet the latest updates from multiple RSS feeds.
 
 __Sorry, what does it do?__
 
@@ -64,6 +64,9 @@ positional arguments:
   optional arguments:
     -h, --help  show this help message and exit
 ```
+
+You can setup a cron job that runs every minute if you need to call feedr regularly:
+`*/1 * * * * /usr/bin/bash -c "/usr/bin/python3 /home/feedr/feedr cfg.ini" >> /home/feedr/feedr.log 2>&1`
 
 ### License
 -----------
