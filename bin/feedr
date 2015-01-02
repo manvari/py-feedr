@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import argparse
 from configparser import SafeConfigParser
 import json
 
@@ -7,10 +8,17 @@ from feedr.monitor import MonitorFeedUpdate
 
 if __name__ == "__main__":
 
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("config", type=str,
+                           help="path to the feedr configuration file")
+    args = argparser.parse_args()
+
     configparser = SafeConfigParser()
-    cfg = configparser.read('feedr.ini')
+    cfg = configparser.read(args.config)
     if not cfg:
-        raise ValueError('Could not find configuration file feedr.ini')
+        raise ValueError(
+            'Could not find configuration file {}'.format(
+                args.config))
 
     feedlist_location = configparser['feeds']['feedlist']
     with open(feedlist_location) as f:
