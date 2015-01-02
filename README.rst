@@ -3,9 +3,9 @@ Introduction
 
 feedr is a non-asynchronous, WTFPLv2-licensed Python parser to tweet the latest updates from multiple RSS feeds.
 
-More information can be found at `feedr's git repository`.
+More information can be found at `its git repository`.
 
-.. _`feedr's git repository`: https://github.com/iceTwy/py-feedr
+.. _`its git repository`: https://github.com/iceTwy/py-feedr
 
 Registration
 ============
