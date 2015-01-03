@@ -42,8 +42,9 @@ Then run `$ (sudo) python setup.py install` to install imgur-scraper.
 Installation requirements:
 
 * Python 3
-* [requests](https://github.com/kennethreitz/requests)
 * [feedparser](https://pypi.python.org/pypi/feedparser)
+* [requests](https://github.com/kennethreitz/requests)
+* [twitter](https://github.com/sixohsix/twitter)
 
 Runtime requirements:
 
